@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Potato Music Box</title>
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link href="./bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+</head>
+
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+
+
+  <!-- <div class="d-flex flex-column" style="min-height: 100vh;"> -->
+
+  <div class="m-3">
+
+    <div class="d-flex mb-3">
+      <i class="fa-solid fa-radio me-3 fs-1 align-self-center svg"></i>
+      <div class="fs-1">Potato Music Box</div>
+      <div class="fs-6 ms-2">Beta</div>
+      <button id="darkModeButton" onclick="darkModeSwitch()" type="button" class="btn btn-dark position-fixed"
+        style="top: 1rem;right: 1rem;">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+
+      <audio controls class="ms-auto" id="audio-player" style="display:none;">
+        <source src="" type="audio/mp3">
+        Your browser does not support the audio element.
+      </audio>
+    </div>
+
+
+    <div class="d-flex align-items-start">
+      <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#v-pills-home" type="button" role="tab"
+          aria-controls="v-pills-home" aria-selected="true">欢迎</button>
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#v-pills-playlist" type="button" role="tab"
+          aria-controls="v-pills-profile" aria-selected="false">播放列表</button>
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab"
+          aria-controls="v-pills-disabled" aria-selected="false">设置</button>
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#v-pills-about" type="button" role="tab"
+          aria-controls="v-pills-messages" aria-selected="false">关于</button>
+      </div>
+      <div class="tab-content" id="v-pills-tabContent">
+        <div class="tab-pane show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab"
+          tabindex="0">
+          <h2><b>
+              欢迎来到土豆音趴！
+            </b></h2>
+          <p class="fs-5 mt-1 mb-1">
+            在开始使用前，请前往设置界面填入房间密钥与用户密钥<br>
+            之后你就可以在播放列表中中添加你想听的歌曲，其他用户将同步播放，目前支持网易云&网易云电台
+          </p>
+          <img src="redmusic.jpg" style="max-width: 500px;"></img>
+
+          <p>
+            * 本项目暂时处于内测阶段，只对部分用户开放<br>
+            * 最近一次更新：2023/8/28
+          </p>
+
+        </div>
+        <div class="tab-pane" id="v-pills-playlist" role="tabpanel" tabindex="0">
+
+          <form class="mt-2 d-flex">
+            <div>
+              <input type="text" class="form-control" id="songAddInput" placeholder="输入网易云/网易云电台链接"
+                style="width: 500px;">
+            </div>
+            <button type="button" class="btn btn-primary" onclick="addSong()" id="addSongButton">添加</button>
+            <button type="button" class="btn btn-danger" onclick="clearPlayList()"
+              id="clearPlayListButton">清空列表</button>
+          </form>
+
+          <div class="mt-2" id="userOnlineList">
+            当前在线：
+          </div>
+
+          <table class="table table-hover" style="text-align: left;vertical-align: middle;">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">标题</th>
+                <th scope="col">歌手</th>
+                <th scope="col">点歌者</th>
+                <th scope="col">操作</th>
+              </tr>
+            </thead>
+            <tbody id="playlist-table">
+              <tr class="table-primary">
+                <th scope="row">正在连接到服务器...</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div id="hitokoto" style="text-align: center;opacity: 0.3;">
+            ...
+          </div>
+        </div>
+        <div class="tab-pane" id="v-pills-settings" role="tabpanel" tabindex="0">
+
+          <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#key-tab-pane" type="button"
+                role="tab" aria-selected="true">密钥</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#common-tab-pane" type="button" role="tab"
+                aria-selected="false">通用</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#dev-tab-pane" type="button" role="tab"
+                aria-selected="false">高级</button>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane show active" id="key-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+
+              <form class="mt-2">
+                <div class="mb-3">
+                  <label for="roomKeyInput" class="form-label">房间密钥</label>
+                  <input type="password" class="form-control" id="roomKeyInput">
+                </div>
+                <div class="mb-3">
+                  <label for="userKeyInput" class="form-label">用户密钥</label>
+                  <input type="password" class="form-control" id="userKeyInput">
+                </div>
+                <button type="button" class="btn btn-primary" id="keySettingsSaveButton"
+                  onclick="saveSettingsKey()">保存</button>
+              </form>
+
+            </div>
+
+
+            <div class="tab-pane" id="common-tab-pane" role="tabpanel" tabindex="0">
+              <form class="mt-2">
+                <div class="mb-3">
+                  <label for="serverApiInput" class="form-label">自定义广播服务器 api 地址</label>
+                  <input type="text" class="form-control" id="serverApiInput" placeholder="留空则为默认服务器">
+                </div>
+                <button type="button" class="btn btn-primary" id="commonSettingsSaveButton"
+                  onclick="saveSettingsCommon()">保存</button>
+                <button type="button" class="btn btn-primary" id="commonSettingsCleanCache"
+                  onclick="cleanCache()">清除缓存</button>
+              </form>
+            </div>
+
+
+            <div class="tab-pane" id="dev-tab-pane" role="tabpanel" tabindex="0">
+              <form class="mt-2">
+                <div class="mb-3">
+                  <label for="syncGateInput" class="form-label">播放进度同步最小时差（毫秒）</label>
+                  <input type="text" class="form-control" id="syncGateInput" placeholder="3000">
+                </div>
+                <button type="button" class="btn btn-primary">保存</button>
+              </form>
+            </div>
+
+
+
+
+          </div>
+
+        </div>
+        <div class="tab-pane" id="v-pills-about" role="tabpanel" tabindex="0">
+          <p><b>
+              Coded By RLt<br>
+              Licensed under MIT
+          </p></b>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height: 7rem;">
+
+  </div>
+
+
+
+  <div class="position-fixed bottom-0" id="progress-bar-outer" style="width: 100%;">
+    <div class="progress mt-auto" role="progressbar">
+      <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" style="width: 0%"></div>
+    </div>
+
+    <div class="d-flex m-3">
+      <img style="height: 4rem;width: 4rem;" id="progressBarCover" class="me-3">
+      <div class="d-flex flex-column-reverse justify-content-center">
+        <div style="font-size:0.8rem" id="progressBarArtist">oOoOoOoOoOo</div>
+        <div style="font-size:1.2rem;" id="progressBarTitle">Potato Music Box</div>
+      </div>
+      <input type="range" class="form-range ms-auto mx-2 align-self-center" id="progressBarVolume" style="width: 5rem;"
+        oninput="adjustVolume()">
+      <div class="align-self-center mx-2" style="font-size: 0.85rem;" id="progressBarDuration">
+        0:00 / 0:00
+      </div>
+      <i class="fa-solid fa-pause align-self-center fa-2xl mx-2" style="cursor: pointer;" onclick="playPauseAudio()"
+        id="playPauseAudioButton"></i>
+    </div>
+  </div>
+  <!-- </div> -->
+
+  <script>
+    var roomKey, userKey, serverApi, clearPlayListFlag = false
+    let songInfoCache = [], playlist
+    var syncGate = 3000
+
+    const serverApiDefault = "https://pmb-api.akyuu.cn/api/"
+
+    // var serverApi = "http://localhost:33000/api/"
+    // var serverApi = "https://pmb-api.akyuu.cn/api/"
+
+
+    // 初始化
+    loadSettingsFromLS()
+    writeSettingsToInput()
+    startMainLoop()
+
+    // hitokoto
+    !(async function () {
+      const response = await fetch('https://v1.hitokoto.cn?c=a&c=b&c=c&c=d&c=e&c=f&c=g&c=h&c=i&c=j&c=k')
+      const { uuid, hitokoto: hitokotoText } = await response.json()
+      const hitokoto = document.querySelector('#hitokoto')
+      // hitokoto.href = `https://hitokoto.cn/?uuid=${uuid}`
+      hitokoto.innerText = hitokotoText
+    })()
+
+    // 深色模式
+    !(function () {
+      if (localStorage.getItem("darkMode") == 1) {
+        document.body.classList.add('dark-mode')
+      }
+    })()
+
+
+    // 从localStorage中读入设置&缓存
+    function loadSettingsFromLS() {
+      roomKey = localStorage.getItem("roomKey")
+      userKey = localStorage.getItem("userKey")
+      if (localStorage.getItem("songInfoCache") != null) {
+        songInfoCache = JSON.parse(localStorage.getItem("songInfoCache"))
+      }
+      if (localStorage.getItem("serverApi") != null) {
+        serverApi = localStorage.getItem("serverApi")
+      } else {
+        serverApi = serverApiDefault
+      }
+      if (localStorage.getItem("volume") != null) {
+        var pbv = document.getElementById("progressBarVolume")
+        var ap = document.getElementById("audio-player")
+        pbv.value = localStorage.getItem("volume") * 100
+        ap.volume = localStorage.getItem("volume")
+      } else {
+        var pbv = document.getElementById("progressBarVolume")
+        var ap = document.getElementById("audio-player")
+        pbv.value = 50
+        ap.volume = 0.5
+      }
+
+
+
+    }
+
+    // 更新用户界面上的设置中的文本
+    function writeSettingsToInput() {
+      document.getElementById("roomKeyInput").value = roomKey
+      document.getElementById("userKeyInput").value = userKey
+      document.getElementById("serverApiInput").value = serverApi
+    }
+
+    // （带缓存）获取指定歌曲信息
+    async function getSongInfo(platform, id) {
+      if (platform == "netease") {
+        let data = songInfoCache.find(function (item) {
+          return item.platform === platform && item.id === id
+        })
+        if (data == null) {
+          data = await apiNeteaseGetSongInfo(id)
+          songInfoCache.push({
+            platform: platform,
+            id: id,
+            data: data
+          })
+          return data
+        } else {
+          console.log("缓存响应成功：" + platform)
+          return data.data
+        }
+      } else if (platform == "neteasedj") {
+        let data = songInfoCache.find(function (item) {
+          return item.platform === platform && item.id === id
+        })
+        if (data == null) {
+          data = await apiNeteaseGetSongInfoDj(id)
+          songInfoCache.push({
+            platform: platform,
+            id: id,
+            data: data
+          })
+          return data
+        } else {
+          console.log("缓存响应成功：" + platform)
+          return data.data
+        }
+      } else {
+        return null
+      }
+    }
+
+    // 从api中获取最新的播放列表，并更新到用户界面的表格上
+    async function updatePlaylist() {
+
+      let latestPlaylist = await apiPlaylistGet()
+      if (JSON.stringify(latestPlaylist) != JSON.stringify(playlist)) {
+        playlist = latestPlaylist
+        let table = document.getElementById("playlist-table")
+        let i = 0
+        table.innerHTML = ""
+        for await (item of playlist.data) {
+          let r = table.insertRow(i)
+          let c1 = r.insertCell(0)
+          let c2 = r.insertCell(1)
+          let c3 = r.insertCell(2)
+          let c4 = r.insertCell(3)
+          let c5 = r.insertCell(4)
+          c1.innerHTML = `<b>${i + 1}</b>`
+          let songInfo = await getSongInfo(item.platform, item.id)
+          if (item.platform == "netease") {
+            c2.innerHTML = songInfo.songs[0].name
+            c3.innerHTML = neteaseGetArtistString(songInfo.songs[0].ar)
+            c4.innerHTML = item.addby
+            c5.innerHTML = "来自网易云"
+          } else if (item.platform == "neteasedj") {
+            c2.innerHTML = songInfo.program.name
+            c3.innerHTML = songInfo.program.dj.nickname
+            c4.innerHTML = item.addby
+            c5.innerHTML = "来自网易云电台"
+          }
+          i++
+        }
+
+
+        // 更新下方进度条上的信息
+        if (playlist.data.length != 0) {
+          let pbt = document.getElementById("progressBarTitle")
+          let pba = document.getElementById("progressBarArtist")
+          let pbc = document.getElementById("progressBarCover")
+
+          if (playlist.data[0].platform == "netease") {
+            let songInfo = await getSongInfo(playlist.data[0].platform, playlist.data[0].id)
+
+            pbt.innerText = songInfo.songs[0].name
+            pba.innerText = neteaseGetArtistString(songInfo.songs[0].ar)
+            pbc.src = songInfo.songs[0].al.picUrl
+
+          } else if (playlist.data[0].platform == "neteasedj") {
+            let songInfo = await getSongInfo(playlist.data[0].platform, playlist.data[0].id)
+
+            pbt.innerText = songInfo.program.name
+            pba.innerText = songInfo.program.dj.nickname
+            pbc.src = songInfo.program.coverUrl
+
+          }
+        }
+
+
+
+
+
+      } else {
+        console.log("跳过表格更新")
+      }
+
+
+      let ap = document.getElementById("audio-player")
+
+      if (playlist.data.length != 0) {
+        if (playlist.data[0].platform == "netease") {
+          if (ap.src != playlist.data[0].url) {
+            ap.src = playlist.data[0].url
+          }
+        } else if (playlist.data[0].platform == "neteasedj") {
+          if (ap.src != playlist.data[0].url) {
+            ap.src = playlist.data[0].url
+          }
+        }
+
+        if (Math.abs(ap.currentTime * 1000 - (new Date().getTime() - playlist.data[0].timestamp)) > syncGate) {
+          ap.currentTime = (new Date().getTime() - playlist.data[0].timestamp) / 1000
+        }
+
+        if (Math.abs(ap.currentTime * 1000 - ap.duration * 1000) > syncGate) {
+          ap.play()
+        }
+
+      }
+
+
+
+
+
+    }
+
+    // 清除localStorage和变量中的歌曲信息缓存
+    function cleanCache() {
+      songInfoCache = []
+      localStorage.removeItem("songInfoCache")
+      let bt = document.getElementById("commonSettingsCleanCache")
+      bt.innerText = "清除缓存成功 √"
+      setTimeout(() => {
+        bt.innerText = "清除缓存"
+      }, 2000)
+    }
+
+    // 输入网易云歌手信息json，输出歌手信息字符串
+    function neteaseGetArtistString(ar) {
+      let str = ""
+      ar.forEach(item => {
+        str += item.name
+        str += " / "
+      })
+      str = str.slice(0, -3)
+      return str
+    }
+
+    // 输入在线用户信息json，输出在线用户字符串
+    function getUserOnlineString(ar) {
+      let str = ""
+      ar.forEach(item => {
+        str += item.name
+        str += "、"
+      })
+      str = str.slice(0, -1)
+      return str
+    }
+
+    // 更新底部进度条
+    function updateProgressBar() {
+      let ap = document.getElementById("audio-player")
+
+      if (ap.src == "") { return }
+
+      let pb = document.getElementById("progressBar")
+
+      pb.style.width = `${100 * ap.currentTime / ap.duration}%`
+
+      let pbd = document.getElementById("progressBarDuration")
+
+      let s1 = Math.floor(ap.currentTime % 60)
+      let s2 = Math.floor(ap.duration % 60)
+      let a, b
+      if (s1 < 10) {
+        a = `${Math.floor(ap.currentTime / 60)}:0${s1}`
+      } else {
+        a = `${Math.floor(ap.currentTime / 60)}:${s1}`
+      }
+
+      if (s2 < 10) {
+        b = `${Math.floor(ap.duration / 60)}:0${s2}`
+      } else {
+        b = `${Math.floor(ap.duration / 60)}:${s2}`
+      }
+
+      pbd.innerText = `${a} / ${b}`
+
+    }
+
+    // 暂停/播放音频
+    function playPauseAudio() {
+      let ap = document.getElementById("audio-player")
+      let ppab = document.getElementById("playPauseAudioButton")
+      if (ap.muted) {
+        ap.muted = false
+        ppab.classList.add("fa-pause")
+        ppab.classList.remove("fa-play")
+      } else {
+        ap.muted = true
+        ppab.classList.remove("fa-pause")
+        ppab.classList.add("fa-play")
+      }
+
+    }
+
+    // 发送心跳包
+    async function sendHeartbeat() {
+      let userOnline = await apiSendHeartbeat()
+      userOnline = userOnline.data.filter(item => item.lastseen + 10 * 1000 >= new Date().getTime())
+      let uol = document.getElementById("userOnlineList")
+      uol.innerText = "当前在线：" + getUserOnlineString(userOnline)
+    }
+
+    // 音量监听事件
+    function adjustVolume() {
+      var pbv = document.getElementById("progressBarVolume")
+      var ap = document.getElementById("audio-player")
+
+      ap.volume = pbv.value / 100
+
+      localStorage.setItem("volume", ap.volume)
+    }
+
+    // 开始主循环
+    async function startMainLoop() {
+
+      // 由于浏览器的性能调度，如果网页处于后台，则会降低间隔事件的运行频率
+      // 因此这里我将有必要及时更新的事件写入了 Worker 来绕过这个限制
+
+      // 歌单更新 & 缓存
+      const uw = new Worker("update.js")
+      uw.onmessage = function (event) {
+        updatePlaylist()
+        localStorage.setItem("songInfoCache", JSON.stringify(songInfoCache))
+      }
+
+      // 进度条更新
+      setInterval(() => {
+        updateProgressBar()
+      }, 500)
+
+      // 心跳包
+      const hbw = new Worker("heartbeat.js")
+      hbw.onmessage = function (event) {
+        sendHeartbeat()
+      }
+    }
+
+    // API：获取播放列表
+    function apiPlaylistGet() {
+      return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest()
+        var url = serverApi + "playlist/get"
+
+        var params = {
+          roomKey: roomKey
+        }
+
+        var paramString = Object.keys(params).map(function (key) {
+          return key + '=' + encodeURIComponent(params[key])
+        }).join('&')
+
+        url += '?' + paramString
+        xhr.open('GET', url, true)
+        xhr.onload = function () {
+          if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText)
+            resolve(response)
+          } else {
+            console.error('Failed on apiPlaylistGet()')
+            reject(new Error(xhr.statusText))
+          }
+        }
+        xhr.onerror = function () {
+          reject(new Error("Request failed"))
+        }
+        xhr.send()
+      })
+    }
+
+    // API：清空播放列表
+    function apiPlaylistClear() {
+      return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest()
+        var url = serverApi + "playlist/clear"
+
+        var params = {
+          roomKey: roomKey,
+          userKey: userKey
+        }
+
+        var paramString = Object.keys(params).map(function (key) {
+          return key + '=' + encodeURIComponent(params[key])
+        }).join('&')
+
+        url += '?' + paramString
+        xhr.open('POST', url, true)
+        xhr.onload = function () {
+          if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText)
+            resolve(response)
+          } else {
+            console.error('Failed on apiPlaylistClear()')
+            reject(new Error(xhr.statusText))
+          }
+        }
+        xhr.onerror = function () {
+          reject(new Error("Request failed"))
+        }
+        xhr.send()
+      })
+    }
+
+    // API：向播放列表中添加项目
+    function apiPlaylistAdd(platform, id, length, songUrl) {
+      return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest()
+        var url = serverApi + "playlist/add"
+
+        var params = {
+          roomKey: roomKey,
+          userKey: userKey,
+          platform: platform,
+          id: id,
+          length: length,
+          url: songUrl
+        }
+
+        var paramString = Object.keys(params).map(function (key) {
+          return key + '=' + encodeURIComponent(params[key])
+        }).join('&')
+
+        url += '?' + paramString
+        xhr.open('POST', url, true)
+        xhr.onload = function () {
+          if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText)
+            resolve(response)
+          } else {
+            console.error('Failed on apiPlaylistAdd()')
+            reject(new Error(xhr.statusText))
+          }
+        }
+        xhr.onerror = function () {
+          reject(new Error("Request failed"))
+        }
+        xhr.send()
+      })
+    }
+
+    // API：从网易云服务器上获取歌曲信息JSON
+    function apiNeteaseGetSongInfo(id) {
+      console.warn("请求了网易云API：/song/detail")
+      return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest()
+        var url = "https://ncm-api.akyuu.cn/song/detail"
+
+        var params = {
+          ids: id
+        }
+
+        var paramString = Object.keys(params).map(function (key) {
+          return key + '=' + encodeURIComponent(params[key])
+        }).join('&')
+
+        url += '?' + paramString
+        xhr.open('GET', url, true)
+        xhr.onload = function () {
+          if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText)
+            resolve(response)
+          } else {
+            console.error('Failed on apiNeteaseGetSongInfo()')
+            reject(new Error(xhr.statusText))
+          }
+        }
+        xhr.onerror = function () {
+          reject(new Error("Request failed"))
+        }
+        xhr.send()
+      })
+    }
+
+    // API：从网易云服务器上获取电台歌曲信息JSON
+    function apiNeteaseGetSongInfoDj(id) {
+      console.warn("请求了网易云API：/dj/program/detail")
+      return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest()
+        var url = "https://ncm-api.akyuu.cn/dj/program/detail"
+
+        var params = {
+          id: id
+        }
+
+        var paramString = Object.keys(params).map(function (key) {
+          return key + '=' + encodeURIComponent(params[key])
+        }).join('&')
+
+        url += '?' + paramString
+        xhr.open('GET', url, true)
+        xhr.onload = function () {
+          if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText)
+            resolve(response)
+          } else {
+            console.error('Failed on apiNeteaseGetSongInfo()')
+            reject(new Error(xhr.statusText))
+          }
+        }
+        xhr.onerror = function () {
+          reject(new Error("Request failed"))
+        }
+        xhr.send()
+      })
+    }
+
+    // API：从网易云服务器上获取歌曲链接（仅供电台使用）
+    function apiNeteaseGetSongUrl(id) {
+      console.warn("请求了网易云API：/song/url")
+      return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest()
+        var url = "https://ncm-api.akyuu.cn/song/url"
+
+        var params = {
+          id: id
+        }
+
+        var paramString = Object.keys(params).map(function (key) {
+          return key + '=' + encodeURIComponent(params[key])
+        }).join('&')
+
+        url += '?' + paramString
+        xhr.open('GET', url, true)
+        xhr.onload = function () {
+          if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText)
+            resolve(response)
+          } else {
+            console.error('Failed on apiNeteaseGetSongUrl()')
+            reject(new Error(xhr.statusText))
+          }
+        }
+        xhr.onerror = function () {
+          reject(new Error("Request failed"))
+        }
+        xhr.send()
+      })
+    }
+
+
+    // API：发送心跳包
+    function apiSendHeartbeat() {
+      return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest()
+        var url = serverApi + "user/heartbeat"
+
+        var params = {
+          roomKey: roomKey,
+          userKey: userKey
+        }
+
+        var paramString = Object.keys(params).map(function (key) {
+          return key + '=' + encodeURIComponent(params[key])
+        }).join('&')
+
+        url += '?' + paramString
+        xhr.open('POST', url, true)
+        xhr.onload = function () {
+          if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText)
+            resolve(response)
+          } else {
+            console.error('Failed on apiSendHeartbeat()')
+            reject(new Error(xhr.statusText))
+          }
+        }
+        xhr.onerror = function () {
+          reject(new Error("Request failed"))
+        }
+        xhr.send()
+      })
+    }
+
+    // 按钮：保存密钥设置
+    function saveSettingsKey() {
+      let rk = document.getElementById("roomKeyInput").value
+      let uk = document.getElementById("userKeyInput").value
+      localStorage.setItem("roomKey", rk)
+      localStorage.setItem("userKey", uk)
+      loadSettingsFromLS()
+      let bt = document.getElementById("keySettingsSaveButton")
+      bt.innerText = "保存成功 √"
+      setTimeout(() => {
+        bt.innerText = "保存"
+      }, 2000)
+    }
+
+    // 按钮：保存通用设置
+    function saveSettingsCommon() {
+      let customApi = document.getElementById("serverApiInput").value
+      if (customApi != "") {
+        serverApi = customApi
+      } else {
+        serverApi = serverApiDefault
+      }
+      localStorage.setItem("serverApi", serverApi)
+      let bt = document.getElementById("commonSettingsSaveButton")
+      bt.innerText = "保存成功 √"
+      setTimeout(() => {
+        bt.innerText = "保存"
+      }, 2000)
+    }
+
+    // 按钮：添加歌曲
+    async function addSong() {
+      let ib = document.getElementById("songAddInput")
+      let url = ib.value
+      ib.value = ""
+      url = url.replace("/#", "")
+      if (url.indexOf("music.163.com/song") != -1) {
+        const neteaseId = url.match(/id=(\d+)/)[1]
+        const length = Math.round((await getSongInfo("netease", neteaseId)).songs[0].dt / 1000)
+        const songUrl = `https://music.163.com/song/media/outer/url?id=${neteaseId}.mp3`
+        apiPlaylistAdd("netease", neteaseId, length, songUrl)
+      } else if (url.indexOf("music.163.com/dj") != -1) {
+        const neteaseId = url.match(/id=(\d+)/)[1]
+        const length = Math.round((await getSongInfo("neteasedj", neteaseId)).program.duration / 1000)
+        const neteaseDjId = (await getSongInfo("neteasedj", neteaseId)).program.mainSong.id
+        const songUrl = (await apiNeteaseGetSongUrl(neteaseDjId)).data[0].url.replace("http", "https")
+        apiPlaylistAdd("neteasedj", neteaseId, length, songUrl)
+      } else {
+        alert("无法正确识别歌曲链接，请检查")
+      }
+
+    }
+
+    // 按钮：清空列表
+    async function clearPlayList() {
+      if (clearPlayListFlag == false) {
+        const cplb = document.getElementById("clearPlayListButton")
+        cplb.innerText = "再次点击以确认"
+        clearPlayListFlag = true
+        setTimeout(() => {
+          const cplb = document.getElementById("clearPlayListButton")
+          cplb.innerText = "清空列表"
+          clearPlayListFlag = false
+        }, 3000)
+      } else {
+        apiPlaylistClear()
+        console.warn("播放列表已清空")
+        const cplb = document.getElementById("clearPlayListButton")
+        cplb.innerText = "清空成功 √"
+        clearPlayListFlag = false
+        setTimeout(() => {
+          const cplb = document.getElementById("clearPlayListButton")
+          cplb.innerText = "清空列表"
+        }, 3000)
+      }
+
+    }
+
+    // 按钮：切换深色模式
+    function darkModeSwitch() {
+      if (localStorage.getItem("darkMode") == null) {
+        localStorage.setItem("darkMode", 0)
+      }
+      if (localStorage.getItem("darkMode") == 0) {
+        document.body.classList.add('dark-mode')
+        localStorage.setItem("darkMode", 1)
+      } else {
+        document.body.classList.remove('dark-mode')
+        localStorage.setItem("darkMode", 0)
+      }
+    }
+
+  </script>
+
+  <style>
+    /* 滚动条样式 */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 10px;
+      background-color: var(--pu-body-bg-color);
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #8b8b8b;
+      border-radius: 5px;
+    }
+
+
+    ::-webkit-scrollbar-track {
+      background-color: var(--pu-body-bg-color);
+      border-radius: 5px;
+    }
+  </style>
+
+  <!-- 深色模式 -->
+  <style>
+    /* 默认情况下应用浅色样式 */
+    body {
+      --pu-text: #000;
+      --pu-hover: #555;
+      --pu-text-muted: #757575;
+      --pu-body-bg-color: #FFF;
+      --pu-card-bg-color: #ededed;
+    }
+
+    /* 深色样式 */
+    body.dark-mode {
+      --pu-body-bg-color: #222;
+      --pu-navbar-bg-color: #282828;
+      --pu-card-bg-color: #555;
+      --pu-text: #FFF;
+      --pu-hover: #D0D0D0;
+      --pu-btn-bg-color: #78aaff;
+      --pu-btn-bg-color-hover: #aac9ff;
+      --pu-text-muted: #a2a2a2;
+      --pu-svg: #FFF;
+    }
+
+    body {
+      background-color: var(--pu-body-bg-color);
+      color: var(--pu-text);
+      transition-duration: 300ms !important;
+    }
+
+    .navbar {
+      background-color: var(--pu-navbar-bg-color);
+      transition-duration: 300ms !important;
+    }
+
+    .navbar-brand {
+      color: var(--pu-text);
+      transition-duration: 300ms !important;
+    }
+
+    .navbar-brand:hover {
+      color: var(--pu-hover);
+      transition-duration: 300ms !important;
+    }
+
+    .nav-link {
+      color: var(--pu-text);
+      transition-duration: 300ms !important;
+    }
+
+    .nav-link:hover {
+      color: var(--pu-hover);
+      transition-duration: 300ms !important;
+    }
+
+    .pu-navbar-icon {
+      color: var(--pu-text) !important;
+      transition-duration: 300ms !important;
+    }
+
+    .pu-navbar-icon:hover {
+      color: var(--pu-hover) !important;
+      transition-duration: 300ms !important;
+    }
+
+
+
+    .card {
+      background-color: var(--pu-card-bg-color);
+      transition-duration: 300ms !important;
+    }
+
+
+    .form-label {
+      color: var(--pu-text) !important;
+      transition-duration: 300ms !important;
+    }
+
+
+
+    .table {
+      --bs-table-color: var(--pu-text) !important;
+      --bs-table-bg: var(--pu-bg-color) !important;
+      --bs-table-hover-color: var(--pu-bg-color) !important;
+      transition-duration: 300ms !important;
+    }
+
+    .btn-outline-secondary {
+      color: var(--pu-btn-bg-color);
+      transition-duration: 300ms !important;
+    }
+
+    .btn-outline-secondary:hover {
+      color: var(--pu-btn-bg-color-hover);
+      transition-duration: 300ms !important;
+    }
+
+    .text-muted {
+      color: var(--pu-text-muted) !important;
+      transition-duration: 300ms !important;
+    }
+
+    .svg {
+      color: var(--pu-svg) !important;
+      transition-duration: 300ms !important;
+    }
+
+    #progress-bar-outer {
+      background-color: var(--pu-body-bg-color) !important;
+      transition-duration: 300ms !important;
+    }
+
+    .progress {
+      --bs-progress-bg: var(--pu-card-bg-color) !important;
+      transition-duration: 300ms !important;
+    }
+
+    .form-range{
+      --bs-tertiary-bg: var(--pu-card-bg-color) !important;
+      transition-duration: 300ms !important;
+    }
+  </style>
+
+
+</body>
+
+</html>
